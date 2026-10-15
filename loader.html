@@ -7,8 +7,34 @@
     <title>App Loader</title>
     <script>
         (function () {
-            // Prevent redirects and url location changes
+            // Force-mock location, origin, and document properties to simulate https://discord.com 
+            // for WASM origin checks and router compatibility inside opaque data: URLs
             try {
+                const fakeUrl = 'https://discord.com/channels/@me';
+                const parsedUrl = new URL(fakeUrl);
+
+                Object.defineProperty(window, 'origin', {
+                    value: parsedUrl.origin,
+                    writable: false,
+                    configurable: true
+                });
+
+                Object.defineProperty(document, 'URL', {
+                    get: () => fakeUrl,
+                    configurable: true
+                });
+
+                Object.defineProperty(document, 'documentURI', {
+                    get: () => fakeUrl,
+                    configurable: true
+                });
+
+                Object.defineProperty(document, 'domain', {
+                    get: () => parsedUrl.hostname,
+                    set: () => { },
+                    configurable: true
+                });
+
                 Object.defineProperty(window, 'location', {
                     value: new Proxy(window.location, {
                         set(target, prop, value) {
@@ -16,8 +42,16 @@
                             return true;
                         },
                         get(target, prop) {
-                            if (prop === 'href' || prop === 'assign' || prop === 'replace') {
-                                return target.href;
+                            if (prop === 'href') return fakeUrl;
+                            if (prop === 'origin') return parsedUrl.origin;
+                            if (prop === 'protocol') return parsedUrl.protocol;
+                            if (prop === 'host') return parsedUrl.host;
+                            if (prop === 'hostname') return parsedUrl.hostname;
+                            if (prop === 'pathname') return parsedUrl.pathname;
+                            if (prop === 'search') return parsedUrl.search;
+                            if (prop === 'hash') return parsedUrl.hash;
+                            if (prop === 'assign' || prop === 'replace' || prop === 'reload') {
+                                return function () { };
                             }
                             const val = target[prop];
                             return typeof val === 'function' ? val.bind(target) : val;
@@ -27,7 +61,7 @@
                     configurable: true
                 });
             } catch (e) {
-                console.warn("Could not lock location object:", e);
+                console.warn("Could not spoof location/origin object:", e);
             }
 
             // Aggressively clean and sanitize history URLs for local file / null origin contexts
@@ -284,20 +318,6 @@
                     keys: async () => [],
                     delete: async () => false,
                     match: async () => null
-                };
-            }
-
-            // Fallback for WebAssembly.instantiateStreaming to prevent 'unreachable' traps from strict MIME type checks
-            if (typeof WebAssembly !== 'undefined' && WebAssembly.instantiateStreaming) {
-                const originalInstantiateStreaming = WebAssembly.instantiateStreaming;
-                WebAssembly.instantiateStreaming = async function (source, importObject) {
-                    try {
-                        return await originalInstantiateStreaming(source, importObject);
-                    } catch (err) {
-                        const response = await (source instanceof Promise ? source : Promise.resolve(source));
-                        const buffer = await response.arrayBuffer();
-                        return await WebAssembly.instantiate(buffer, importObject);
-                    }
                 };
             }
 
