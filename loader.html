@@ -30,6 +30,28 @@
                 console.warn("Could not lock location object:", e);
             }
 
+            // Prevent History API security errors in local file / null origin contexts
+            try {
+                const originalPushState = history.pushState;
+                const originalReplaceState = history.replaceState;
+                history.pushState = function (state, title, url) {
+                    if (url && typeof url === 'string' && url.includes('file:///')) {
+                        url = '/' + url.replace(/^file:\/\/\/[A-Za-z]:\/?/, '');
+                    }
+                    return originalPushState.apply(this, arguments);
+                };
+                history.replaceState = function (state, title, url) {
+                    if (url && typeof url === 'string' && url.includes('file:///')) {
+                        url = '/' + url.replace(/^file:\/\/\/[A-Za-z]:\/?/, '');
+                    }
+                    try {
+                        return originalReplaceState.apply(this, arguments);
+                    } catch (err) {
+                        // Suppress origin security errors for local file state changes
+                    }
+                };
+            } catch (e) { }
+
             // Helper to clean and route asset or relative paths correctly
             function resolveAssetUrl(val) {
                 if (!val || typeof val !== 'string') return val;
@@ -90,6 +112,8 @@
                     let url = resource;
                     if (typeof url === 'string') {
                         url = resolveAssetUrl(url);
+                    } else if (url instanceof URL) {
+                        url = new URL(resolveAssetUrl(url.toString()));
                     }
                     return originalFetch.call(this, url, init);
                 };
@@ -99,7 +123,7 @@
             const originalWorker = window.Worker;
             if (originalWorker) {
                 window.Worker = function (scriptURL, options) {
-                    let resolvedUrl = resolveAssetUrl(scriptURL);
+                    let resolvedUrl = typeof scriptURL === 'string' ? resolveAssetUrl(scriptURL) : scriptURL;
                     try {
                         return new originalWorker(resolvedUrl, options);
                     } catch (e) {
