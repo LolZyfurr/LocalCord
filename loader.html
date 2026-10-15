@@ -33,12 +33,29 @@
             // Helper to clean and route asset or relative paths correctly
             function resolveAssetUrl(val) {
                 if (!val || typeof val !== 'string') return val;
-                if (val.startsWith('/assets/') || val.startsWith('assets/') || val.startsWith('file://') || val.includes('C:')) {
-                    return val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://jsdelivralt.lolzyfurr.workers.dev/src/assets/');
-                } else if (val.startsWith('/')) {
+
+                // If it's already pointing to your worker domain but missing /src/, fix it
+                if (val.includes('jsdelivralt.lolzyfurr.workers.dev') && !val.includes('/src/')) {
+                    return val.replace('jsdelivralt.lolzyfurr.workers.dev/', 'jsdelivralt.lolzyfurr.workers.dev/src/');
+                }
+
+                // If it's an absolute external URL (other than your worker), leave it alone
+                if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('data:') || val.startsWith('blob:')) {
+                    return val;
+                }
+
+                // Handle Discord API / routing paths
+                if (val.startsWith('/api/') || val.startsWith('/channels/') || val.startsWith('/users/')) {
                     return 'https://discord.com' + val;
                 }
-                return val;
+
+                // Clean up local file protocols, drive letters, leading slashes, or redundant 'assets/' prefixes
+                let cleanPath = val
+                    .replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)/, '')
+                    .replace(/^assets\//, '');
+
+                // Route everything else through your worker with /src/assets/ enforced
+                return `https://jsdelivralt.lolzyfurr.workers.dev/src/assets/${cleanPath}`;
             }
 
             // Intercept document.createElement to catch dynamically created scripts and links
