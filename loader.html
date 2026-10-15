@@ -30,17 +30,49 @@
                 console.warn("Could not lock location object:", e);
             }
 
+            // Helper to clean and route asset or relative paths correctly
+            function resolveAssetUrl(val) {
+                if (!val || typeof val !== 'string') return val;
+                if (val.startsWith('/assets/') || val.startsWith('assets/') || val.startsWith('file://') || val.includes('C:')) {
+                    return val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://cdn.jsdelivr.net/gh/LolZyfurr/LocalCord@main/assets/');
+                } else if (val.startsWith('/')) {
+                    return 'https://discord.com' + val;
+                }
+                return val;
+            }
+
+            // Intercept document.createElement to catch dynamically created scripts and links
+            const originalCreateElement = document.createElement;
+            document.createElement = function (tagName, options) {
+                const element = originalCreateElement.call(document, tagName, options);
+                if (tagName && tagName.toLowerCase() === 'script') {
+                    const originalSetAttribute = element.setAttribute;
+                    element.setAttribute = function (name, value) {
+                        if (name === 'src') {
+                            value = resolveAssetUrl(value);
+                        }
+                        return originalSetAttribute.call(this, name, value);
+                    };
+                    Object.defineProperty(element, 'src', {
+                        set(value) {
+                            element.setAttribute('src', value);
+                        },
+                        get() {
+                            return element.getAttribute('src');
+                        },
+                        configurable: true
+                    });
+                }
+                return element;
+            };
+
             // Intercept fetch to route local assets to CDN or prepend discord.com for relative requests
             const originalFetch = window.fetch;
             if (originalFetch) {
                 window.fetch = function (resource, init) {
                     let url = resource;
                     if (typeof url === 'string') {
-                        if (url.startsWith('/assets/') || url.startsWith('assets/') || url.startsWith('file://') || url.includes('C:')) {
-                            url = url.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://cdn.jsdelivr.net/gh/LolZyfurr/LocalCord@main/assets/');
-                        } else if (url.startsWith('/')) {
-                            url = 'https://discord.com' + url;
-                        }
+                        url = resolveAssetUrl(url);
                     }
                     return originalFetch.call(this, url, init);
                 };
@@ -54,13 +86,9 @@
                             ['src', 'href'].forEach((attr) => {
                                 if (node.hasAttribute && node.hasAttribute(attr)) {
                                     let val = node.getAttribute(attr);
-                                    if (val) {
-                                        if (val.startsWith('/assets/') || val.startsWith('assets/') || val.startsWith('file://') || val.includes('C:')) {
-                                            let fixed = val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://cdn.jsdelivr.net/gh/LolZyfurr/LocalCord@main/assets/');
-                                            node.setAttribute(attr, fixed);
-                                        } else if (val.startsWith('/')) {
-                                            node.setAttribute(attr, 'https://discord.com' + val);
-                                        }
+                                    let fixed = resolveAssetUrl(val);
+                                    if (fixed !== val) {
+                                        node.setAttribute(attr, fixed);
                                     }
                                 }
                             });
