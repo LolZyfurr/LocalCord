@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push([["377109"],{935922(p,i,s){p.exports={x:"button__0f074",R:"visible__0f074"}},764035(p,i,s){p.exports={Fx:"itemIcon_a647f7",Y_:"hasTooltip_a647f7",In:"applicationIcon_a647f7"}}}]);

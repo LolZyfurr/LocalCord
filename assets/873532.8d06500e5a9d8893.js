@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push([["873532"],{351665(n,o,s){n.exports={Z:"venmoIcon__44362",y:"connectionInstructions__44362"}},438983(n,o,s){n.exports={rf:"body_d31d57",je:"bankSelectionStub_d31d57"}}}]);

@@ -1,0 +1,74 @@
+<svg width="15" height="24" viewBox="0 0 14.92 24.3" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="a">
+      <path d="M14.919 17.1V7.2L7.46 0 0 7.2v9.9l7.46 7.2 7.459-7.2Z"/>
+    </clipPath>
+    <linearGradient id="b" x1="-.05" y1=".08" x2="3.5" y2="9.84" gradientUnits="userSpaceOnUse">
+      <stop offset=".159" stop-color="#FF90EA"/>
+      <stop offset=".893" stop-color="#C0069E"/>
+    </linearGradient>
+    <linearGradient id="c" x1="1.01" y1="2.04" x2="8.61" y2="15.2" gradientUnits="userSpaceOnUse">
+      <stop offset=".159" stop-color="#FF90EA"/>
+      <stop offset=".302" stop-color="#FFA9F0"/>
+      <stop offset=".385" stop-color="#FFBAF4"/>
+      <stop offset=".45" stop-color="#FF93EA"/>
+      <stop offset=".596" stop-color="#FF33D4"/>
+      <stop offset=".615" stop-color="#F92ECE"/>
+      <stop offset=".729" stop-color="#D918B4"/>
+      <stop offset=".826" stop-color="#C60AA3"/>
+      <stop offset=".893" stop-color="#C0069E"/>
+    </linearGradient>
+    <linearGradient id="d" x1="3.88" y1="-1.35" x2="7.51" y2="8.61" gradientUnits="userSpaceOnUse">
+      <stop offset=".159" stop-color="#FF90EA"/>
+      <stop offset=".893" stop-color="#C0069E"/>
+    </linearGradient>
+  </defs>
+  <g clip-path="url(#a)">
+    <path d="M14.919 17.1V7.2L7.46 0 0 7.2v9.9l7.46 7.2 7.459-7.2Z" fill="white"/>
+    <g transform="translate(7.46)">
+      <path d="M0 0v8.561l4.373 8.511 7.46-7.2L0 0Z" fill="#B3269C"/>
+    </g>
+    <g transform="translate(10.42 7.2)">
+      <path d="M4.504 0 1.417 1.311 0 2.399l1.417 6.19L4.504 9.9V0Z" fill="#FF4CD2"/>
+    </g>
+    <g transform="translate(7.19 15.79)">
+      <path d="m7.725 1.311-3.086-1.311L0 .908l.266 3.313v4.29L7.725 1.311Z" fill="#B3269C"/>
+    </g>
+    <g transform="translate(0 15.79)">
+      <path d="M3.087 0 0 1.311l7.46 7.2V4.221 1.791L3.087 0Z" fill="#8C1381"/>
+    </g>
+    <g transform="translate(0 7.2)">
+      <path d="m3.087 8.589 1.71-4.867L3.087 1.311 0 0v9.9l3.087-1.311Z" fill="url(#b)"/>
+    </g>
+    <path d="M0 7.2 3.087 8.511 7.46 6.65V4.29 0L0 7.2Z" fill="#FCC0F4"/>
+    <g transform="translate(3.09 4.29)">
+      <path d="M0 11.5V4.221L4.373 0l4.372 4.221V11.5l-4.372 4.22L0 11.5Z" fill="url(#c)"/>
+    </g>
+    <g transform="translate(3.09 15.79)">
+      <path d="M8.746 0 4.508 4.09a.193.193 0 0 1-.27 0L0 0l4.178 4.334a.263.263 0 0 1 .084.201l.111 3.975.11-3.975a.263.263 0 0 1 .085-.2L8.746 0Z" fill="url(#d)"/>
+    </g>
+    <g transform="translate(3.09)">
+      <path d="M0 8.511 4.237 4.42a.193.193 0 0 1 .271 0L8.746 8.511 4.568 4.177a.263.263 0 0 1-.085-.2L4.373.001l-.11 3.975a.263.263 0 0 1-.085.2L0 8.512Z" fill="white"/>
+    </g>
+    <g transform="translate(11.67 15.55)">
+      <path d="M3.251 1.553 0 .401A.185.185 0 0 0 .164.014V0l3.087 1.553Z" fill="#FD99E9"/>
+    </g>
+    <g transform="translate(0 15.55)">
+      <path d="M0 1.553 3.251.401A.185.185 0 0 1 3.087.014V0L0 1.553Z" fill="#FF4CD2"/>
+    </g>
+    <g transform="translate(0 7.2)">
+      <path d="M0 0l2.73 1.373a.19.19 0 0 1 .141.218l.216 4.841V1.553 1.539A.264.264 0 0 1 3.251 1.152L0 0Z" fill="#FCC0F4"/>
+    </g>
+    <g transform="translate(1.27 6.94)">
+      <path d="M0 6.714v2.444l11.15-6.582V.133L0 6.714Z" fill="#FBE6FF"/>
+      <path d="m1.586 7.371-.182 1.157a.012.012 0 0 0 .01.013l.393.079a.008.008 0 0 0 .014-.01v-.144a.648.648 0 0 1 .329-.575l.572-.338a.007.007 0 0 0-.004-.014l-1.118-.169a.012.012 0 0 0-.014.01Z" fill="#FBE6FF"/>
+      <path d="m10.116 1.105-.291-.302-.887-.803.359.346a.55.55 0 0 1-.112.947l.932-.188Z" fill="#FBE6FF"/>
+      <path d="m11.15 5.6-9.33 5.454 1.573.667 8.272-4.734-1.515-1.387Z" fill="#F650E0"/>
+      <path d="M9.826 6.375a1.304 1.304 0 0 0 .742-1.293v-.387l.524 1.451-1.266.23Z" fill="#F650E0"/>
+      <path d="m4.983 11.904-.373-.36a.385.385 0 0 1 .07-.56l.863-.493-1.703.455.37.877.773.081Z" fill="#F650E0"/>
+    </g>
+    <g transform="translate(11.67 7.2)">
+      <path d="m.164 6.432.216-4.84a.19.19 0 0 1 .141-.219L3.251 0 0 1.152c.105.101.164.241.164.386v.015l.164 4.879Z" fill="#FCC0F4"/>
+    </g>
+  </g>
+</svg>

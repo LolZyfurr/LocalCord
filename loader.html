@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Loader</title>
+    <script>
+        (function () {
+            let isStorageWorking = true;
+            try {
+                const testKey = '__test_storage__';
+                localStorage.setItem(testKey, testKey);
+                localStorage.removeItem(testKey);
+            } catch (e) {
+                isStorageWorking = false;
+            }
+
+            if (!isStorageWorking || typeof localStorage === 'undefined') {
+                class MemoryStorage {
+                    constructor() {
+                        this.store = {};
+                    }
+                    getItem(key) {
+                        return Object.prototype.hasOwnProperty.call(this.store, key) ? this.store[key] : null;
+                    }
+                    setItem(key, value) {
+                        this.store[key] = String(value);
+                    }
+                    removeItem(key) {
+                        delete this.store[key];
+                    }
+                    clear() {
+                        this.store = {};
+                    }
+                    key(index) {
+                        const keys = Object.keys(this.store);
+                        return keys[index] !== undefined ? keys[index] : null;
+                    }
+                    get length() {
+                        return Object.keys(this.store).length;
+                    }
+                }
+                const mockStorage = new MemoryStorage();
+                try {
+                    Object.defineProperty(window, 'localStorage', {
+                        value: mockStorage,
+                        writable: true,
+                        configurable: true
+                    });
+                    Object.defineProperty(window, 'sessionStorage', {
+                        value: new MemoryStorage(),
+                        writable: true,
+                        configurable: true
+                    });
+                } catch (err) {
+                    window.localStorage = mockStorage;
+                    window.sessionStorage = new MemoryStorage();
+                }
+            }
+
+            const storageKey = 'token';
+            let token = null;
+
+            try {
+                token = localStorage.getItem(storageKey);
+                if (token) {
+                    try { token = JSON.parse(token); } catch (e) { }
+                }
+            } catch (e) {
+                console.warn("Local storage unavailable, using fallback memory store.");
+            }
+
+            while (!token || typeof token !== 'string' || token.trim() === "") {
+                token = prompt("Enter your Discord Token to launch:");
+                if (token === null) {
+                    alert("A token is required to run this application.");
+                    continue;
+                }
+                token = token.trim();
+            }
+
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(token));
+            } catch (e) {
+                window.__fallbackTokenStore = token;
+            }
+
+            const originalGetItem = Storage.prototype.getItem;
+            if (originalGetItem) {
+                Storage.prototype.getItem = function (key) {
+                    if (key === storageKey) {
+                        let val = originalGetItem.call(this, key);
+                        if (!val && window.__fallbackTokenStore) return JSON.stringify(window.__fallbackTokenStore);
+                        return val;
+                    }
+                    return originalGetItem.call(this, key);
+                };
+            }
+        })();
+    </script>
+    <meta http-equiv="refresh" content="0; url=app.html">
+</head>
+
+<body>
+    <p>Loading application...</p>
+</body>
+
+</html>

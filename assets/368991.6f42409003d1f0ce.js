@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push([["368991"],{983156(c,_,e){c.exports={Y:"effectsWrapper__78936",z:"effects__78936"}},722185(c,_,e){c.exports={kL:"container__5b1fc",pz:"sidebar__5b1fc",mF:"sidebarSeparator__5b1fc",oM:"chatArea__5b1fc"}},727961(c,_,e){c.exports={Q:"content__2d9cc",T:"chat__2d9cc"}}}]);

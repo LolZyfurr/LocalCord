@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push([["684231"],{813754(p,s,t){p.exports={i:"descriptionText__535f5",x:"truncate__535f5"}}}]);

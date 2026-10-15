@@ -1,0 +1,1 @@
+"use strict";(this.webpackChunkdiscord_app=this.webpackChunkdiscord_app||[]).push([["464838"],{866660(e,s,t){e.exports={A:"outer_bf9399"}},771800(e,s,t){e.exports={HZ:"safetyBanner__51e4d",Uo:"buttons__51e4d",Be:"shieldAndHeading__51e4d",b:"closeButton__51e4d"}}}]);
