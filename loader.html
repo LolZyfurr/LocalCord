@@ -95,6 +95,21 @@
                 };
             }
 
+            // Intercept window.Worker to fix local file and cross-origin worker initializations
+            const originalWorker = window.Worker;
+            if (originalWorker) {
+                window.Worker = function (scriptURL, options) {
+                    let resolvedUrl = resolveAssetUrl(scriptURL);
+                    try {
+                        return new originalWorker(resolvedUrl, options);
+                    } catch (e) {
+                        const blobCode = `importScripts(${JSON.stringify(resolvedUrl)});`;
+                        const blob = new Blob([blobCode], { type: 'application/javascript' });
+                        return new originalWorker(URL.createObjectURL(blob), options);
+                    }
+                };
+            }
+
             // Intercept dynamic element creation for src/href attributes
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
