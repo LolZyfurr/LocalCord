@@ -7,6 +7,69 @@
     <title>App Loader</title>
     <script>
         (function () {
+            // Prevent redirects and url location changes
+            try {
+                Object.defineProperty(window, 'location', {
+                    value: new Proxy(window.location, {
+                        set(target, prop, value) {
+                            console.warn("Blocked location change/redirect to:", value);
+                            return true;
+                        },
+                        get(target, prop) {
+                            if (prop === 'href' || prop === 'assign' || prop === 'replace') {
+                                return target.href;
+                            }
+                            const val = target[prop];
+                            return typeof val === 'function' ? val.bind(target) : val;
+                        }
+                    }),
+                    writable: false,
+                    configurable: true
+                });
+            } catch (e) {
+                console.warn("Could not lock location object:", e);
+            }
+
+            // Intercept fetch to route local assets to CDN or prepend discord.com for relative requests
+            const originalFetch = window.fetch;
+            if (originalFetch) {
+                window.fetch = function (resource, init) {
+                    let url = resource;
+                    if (typeof url === 'string') {
+                        if (url.startsWith('/assets/') || url.startsWith('assets/') || url.startsWith('file://') || url.includes('C:')) {
+                            url = url.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://cdn.jsdelivr.net/gh/LolZyfurr/LocalCord@main/assets/');
+                        } else if (url.startsWith('/')) {
+                            url = 'https://discord.com' + url;
+                        }
+                    }
+                    return originalFetch.call(this, url, init);
+                };
+            }
+
+            // Intercept dynamic element creation for src/href attributes
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    mutation.addedNodes.forEach((node) => {
+                        if (node.nodeType === 1) {
+                            ['src', 'href'].forEach((attr) => {
+                                if (node.hasAttribute && node.hasAttribute(attr)) {
+                                    let val = node.getAttribute(attr);
+                                    if (val) {
+                                        if (val.startsWith('/assets/') || val.startsWith('assets/') || val.startsWith('file://') || val.includes('C:')) {
+                                            let fixed = val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://cdn.jsdelivr.net/gh/LolZyfurr/LocalCord@main/assets/');
+                                            node.setAttribute(attr, fixed);
+                                        } else if (val.startsWith('/')) {
+                                            node.setAttribute(attr, 'https://discord.com' + val);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+            observer.observe(document, { childList: true, subtree: true });
+
             let isStorageWorking = true;
             try {
                 const testKey = '__test_storage__';
