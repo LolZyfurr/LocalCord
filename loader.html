@@ -33,18 +33,8 @@
             // Helper to clean and route asset or relative paths correctly
             function resolveAssetUrl(val) {
                 if (!val || typeof val !== 'string') return val;
-                if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('//')) {
-                    return val;
-                }
-                let filePath = val;
-                if (filePath.startsWith('/')) {
-                    filePath = filePath.slice(1);
-                }
-                if (!filePath.startsWith('assets/') && !filePath.endsWith('.html')) {
-                    filePath = `assets/${filePath}`;
-                }
-                if (filePath.startsWith('assets/') || filePath.startsWith('file://') || filePath.includes('C:')) {
-                    return filePath.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://jsdelivralt.lolzyfurr.workers.dev/');
+                if (val.startsWith('/assets/') || val.startsWith('assets/') || val.startsWith('file://') || val.includes('C:')) {
+                    return val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://jsdelivralt.lolzyfurr.workers.dev/src/assets/');
                 } else if (val.startsWith('/')) {
                     return 'https://discord.com' + val;
                 }
