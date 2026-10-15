@@ -30,7 +30,7 @@
                 console.warn("Could not lock location object:", e);
             }
 
-            // Prevent History API security errors in local file / null origin contexts
+            // Prevent History API security errors in local file / null origin contexts and trigger router updates
             try {
                 const originalPushState = history.pushState;
                 const originalReplaceState = history.replaceState;
@@ -38,14 +38,18 @@
                     if (url && typeof url === 'string' && url.includes('file:///')) {
                         url = '/' + url.replace(/^file:\/\/\/[A-Za-z]:\/?/, '');
                     }
-                    return originalPushState.apply(this, arguments);
+                    const result = originalPushState.apply(this, arguments);
+                    window.dispatchEvent(new PopStateEvent('popstate', { state }));
+                    return result;
                 };
                 history.replaceState = function (state, title, url) {
                     if (url && typeof url === 'string' && url.includes('file:///')) {
                         url = '/' + url.replace(/^file:\/\/\/[A-Za-z]:\/?/, '');
                     }
                     try {
-                        return originalReplaceState.apply(this, arguments);
+                        const result = originalReplaceState.apply(this, arguments);
+                        window.dispatchEvent(new PopStateEvent('popstate', { state }));
+                        return result;
                     } catch (err) {
                         // Suppress origin security errors for local file state changes
                     }
