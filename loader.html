@@ -84,7 +84,9 @@
             const originalCreateElement = document.createElement;
             document.createElement = function (tagName, options) {
                 const element = originalCreateElement.call(document, tagName, options);
-                if (tagName && tagName.toLowerCase() === 'script') {
+                const tag = tagName ? tagName.toLowerCase() : '';
+
+                if (tag === 'script') {
                     const originalSetAttribute = element.setAttribute;
                     element.setAttribute = function (name, value) {
                         if (name === 'src') {
@@ -98,6 +100,23 @@
                         },
                         get() {
                             return element.getAttribute('src');
+                        },
+                        configurable: true
+                    });
+                } else if (tag === 'link') {
+                    const originalSetAttribute = element.setAttribute;
+                    element.setAttribute = function (name, value) {
+                        if (name === 'href') {
+                            value = resolveAssetUrl(value);
+                        }
+                        return originalSetAttribute.call(this, name, value);
+                    };
+                    Object.defineProperty(element, 'href', {
+                        set(value) {
+                            element.setAttribute('href', value);
+                        },
+                        get() {
+                            return element.getAttribute('href');
                         },
                         configurable: true
                     });
