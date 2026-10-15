@@ -99,7 +99,16 @@
             }
         })();
     </script>
-    <meta http-equiv="refresh" content="0; url=https://raw.githubusercontent.com/LolZyfurr/LocalCord/refs/heads/main/app.html">
+    <script>
+        fetch('https://raw.githubusercontent.com/LolZyfurr/LocalCord/refs/heads/main/app.html')
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(err => console.error('Failed to load HTML:', err));
+    </script>
 </head>
 
 <body>
