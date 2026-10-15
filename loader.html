@@ -33,6 +33,9 @@
             // Helper to clean and route asset or relative paths correctly
             function resolveAssetUrl(val) {
                 if (!val || typeof val !== 'string') return val;
+                if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('//')) {
+                    return val;
+                }
                 let filePath = val;
                 if (filePath.startsWith('/')) {
                     filePath = filePath.slice(1);
