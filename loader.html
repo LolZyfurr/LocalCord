@@ -30,22 +30,30 @@
                 console.warn("Could not lock location object:", e);
             }
 
-            // Prevent History API security errors in local file / null origin contexts and trigger router updates
+            // Aggressively clean and sanitize history URLs for local file / null origin contexts
             try {
                 const originalPushState = history.pushState;
                 const originalReplaceState = history.replaceState;
-                history.pushState = function (state, title, url) {
-                    if (url && typeof url === 'string' && url.includes('file:///')) {
-                        url = '/' + url.replace(/^file:\/\/\/[A-Za-z]:\/?/, '');
+
+                const sanitizeUrl = (url) => {
+                    if (!url || typeof url !== 'string') return url;
+                    // If the router tried to resolve against file:// or drive letters, strip them back to root-relative paths
+                    if (url.includes('file://') || /^[A-Za-z]:/.test(url)) {
+                        let cleaned = url.replace(/^.*?(?:file:\/\/.*?\/|[A-Za-z]:\\|[A-Za-z]:\/)/, '');
+                        return '/' + cleaned.replace(/^\/+/, '');
                     }
+                    return url;
+                };
+
+                history.pushState = function (state, title, url) {
+                    arguments[2] = sanitizeUrl(url);
                     const result = originalPushState.apply(this, arguments);
                     window.dispatchEvent(new PopStateEvent('popstate', { state }));
                     return result;
                 };
+
                 history.replaceState = function (state, title, url) {
-                    if (url && typeof url === 'string' && url.includes('file:///')) {
-                        url = '/' + url.replace(/^file:\/\/\/[A-Za-z]:\/?/, '');
-                    }
+                    arguments[2] = sanitizeUrl(url);
                     try {
                         const result = originalReplaceState.apply(this, arguments);
                         window.dispatchEvent(new PopStateEvent('popstate', { state }));
@@ -59,6 +67,13 @@
             // Helper to clean and route asset or relative paths correctly
             function resolveAssetUrl(val) {
                 if (!val || typeof val !== 'string') return val;
+
+                // Fix protocol-less domain URLs (like media.discordapp.net or raw.githubusercontent.com)
+                if (!val.startsWith('http://') && !val.startsWith('https://') && !val.startsWith('data:') && !val.startsWith('blob:')) {
+                    if (val.includes('discordapp.net') || val.includes('discord.com') || val.includes('githubusercontent.com') || val.includes('github.com')) {
+                        return 'https://' + val.replace(/^\/+/, '');
+                    }
+                }
 
                 // If it's already pointing to your worker domain but missing /src/, fix it
                 if (val.includes('jsdelivralt.lolzyfurr.workers.dev') && !val.includes('/src/')) {
@@ -84,7 +99,7 @@
                 return `https://jsdelivralt.lolzyfurr.workers.dev/src/assets/${cleanPath}`;
             }
 
-            // Intercept document.createElement to catch dynamically created scripts and links
+            // Intercept document.createElement to catch dynamically created scripts, links, and images
             const originalCreateElement = document.createElement;
             document.createElement = function (tagName, options) {
                 const element = originalCreateElement.call(document, tagName, options);
@@ -107,20 +122,21 @@
                         },
                         configurable: true
                     });
-                } else if (tag === 'link') {
+                } else if (tag === 'link' || tag === 'img') {
+                    const attrName = tag === 'link' ? 'href' : 'src';
                     const originalSetAttribute = element.setAttribute;
                     element.setAttribute = function (name, value) {
-                        if (name === 'href') {
+                        if (name === attrName) {
                             value = resolveAssetUrl(value);
                         }
                         return originalSetAttribute.call(this, name, value);
                     };
-                    Object.defineProperty(element, 'href', {
+                    Object.defineProperty(element, attrName, {
                         set(value) {
-                            element.setAttribute('href', value);
+                            element.setAttribute(attrName, value);
                         },
                         get() {
-                            return element.getAttribute('href');
+                            return element.getAttribute(attrName);
                         },
                         configurable: true
                     });
@@ -157,7 +173,7 @@
                 };
             }
 
-            // Intercept dynamic element creation for src/href attributes
+            // Intercept dynamic element creation for src/href attributes via MutationObserver
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     mutation.addedNodes.forEach((node) => {
