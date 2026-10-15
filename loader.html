@@ -34,7 +34,7 @@
             function resolveAssetUrl(val) {
                 if (!val || typeof val !== 'string') return val;
                 if (val.startsWith('/assets/') || val.startsWith('assets/') || val.startsWith('file://') || val.includes('C:')) {
-                    return val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://cdn.jsdelivr.net/gh/LolZyfurr/LocalCord@main/assets/');
+                    return val.replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)?assets\//, 'https://jsdelivralt.lolzyfurr.workers.dev/');
                 } else if (val.startsWith('/')) {
                     return 'https://discord.com' + val;
                 }
