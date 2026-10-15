@@ -37,19 +37,22 @@
 
                 const sanitizeUrl = (url) => {
                     if (!url || typeof url !== 'string') return url;
-                    // If the router tried to resolve against file:// or drive letters, strip them back to root-relative paths
-                    if (url.includes('file://') || /^[A-Za-z]:/.test(url)) {
-                        let cleaned = url.replace(/^.*?(?:file:\/\/.*?\/|[A-Za-z]:\\|[A-Za-z]:\/)/, '');
-                        return '/' + cleaned.replace(/^\/+/, '');
-                    }
-                    return url;
+                    // Strip file://, drive letters, and leading slashes to produce a purely relative path
+                    let cleaned = url
+                        .replace(/^.*?(?:file:\/\/.*?\/|[A-Za-z]:\\|[A-Za-z]:\/)/, '')
+                        .replace(/^\/+/, '');
+                    return cleaned;
                 };
 
                 history.pushState = function (state, title, url) {
                     arguments[2] = sanitizeUrl(url);
-                    const result = originalPushState.apply(this, arguments);
-                    window.dispatchEvent(new PopStateEvent('popstate', { state }));
-                    return result;
+                    try {
+                        const result = originalPushState.apply(this, arguments);
+                        window.dispatchEvent(new PopStateEvent('popstate', { state }));
+                        return result;
+                    } catch (err) {
+                        console.warn("Suppressed pushState security error:", err);
+                    }
                 };
 
                 history.replaceState = function (state, title, url) {
@@ -86,13 +89,16 @@
                 }
 
                 // Handle Discord API / routing paths
-                if (val.startsWith('/api/') || val.startsWith('/channels/') || val.startsWith('/users/')) {
+                if (val.startsWith('/api/') || val.startsWith('/channels/') || val.startsWith('/users/') || val.startsWith('/error-reporting-proxy/')) {
                     return 'https://discord.com' + val;
                 }
 
                 // Clean up local file protocols, drive letters, leading slashes, or redundant 'assets/' prefixes
                 let cleanPath = val
-                    .replace(/^(\/|file:\/\/.*\/|[A-Za-z]:\\.*\\)/, '')
+                    .replace(/^file:\/\/.+?\//, '')
+                    .replace(/^[A-Za-z]:[\/\\]/, '')
+                    .replace(/^\/+/, '')
+                    .replace(/^[A-Za-z]:/, '')
                     .replace(/^assets\//, '');
 
                 // Route everything else through your worker with /src/assets/ enforced
