@@ -251,6 +251,42 @@
                 }
             }
 
+            // Mock indexedDB if undefined in data: URL contexts
+            if (typeof indexedDB === 'undefined') {
+                window.indexedDB = {
+                    open: function () {
+                        return {
+                            set onupgradeneeded(fn) { },
+                            set onsuccess(fn) {
+                                try { fn({ target: { result: { transaction: () => ({ objectStore: () => ({ get: () => ({ set onsuccess(f) { f({ target: { result: null } }); } }), put: () => {} }) }) } } }); } catch (e) { }
+                            },
+                            set onerror(fn) { }
+                        };
+                    },
+                    deleteDatabase: function () {
+                        return { set onsuccess(f) { f(); }, set onerror(f) {} };
+                    }
+                };
+            }
+
+            // Mock CacheStorage (caches) if undefined
+            if (typeof caches === 'undefined') {
+                window.caches = {
+                    open: async function () {
+                        return {
+                            match: async () => null,
+                            put: async () => {},
+                            delete: async () => false,
+                            keys: async () => []
+                        };
+                    },
+                    has: async () => false,
+                    keys: async () => [],
+                    delete: async () => false,
+                    match: async () => null
+                };
+            }
+
             const storageKey = 'token';
             let token = null;
 
