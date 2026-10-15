@@ -258,13 +258,13 @@
                         return {
                             set onupgradeneeded(fn) { },
                             set onsuccess(fn) {
-                                try { fn({ target: { result: { transaction: () => ({ objectStore: () => ({ get: () => ({ set onsuccess(f) { f({ target: { result: null } }); } }), put: () => {} }) }) } } }); } catch (e) { }
+                                try { fn({ target: { result: { transaction: () => ({ objectStore: () => ({ get: () => ({ set onsuccess(f) { f({ target: { result: null } }); } }), put: () => { } }) }) } } }); } catch (e) { }
                             },
                             set onerror(fn) { }
                         };
                     },
                     deleteDatabase: function () {
-                        return { set onsuccess(f) { f(); }, set onerror(f) {} };
+                        return { set onsuccess(f) { f(); }, set onerror(f) { } };
                     }
                 };
             }
@@ -275,7 +275,7 @@
                     open: async function () {
                         return {
                             match: async () => null,
-                            put: async () => {},
+                            put: async () => { },
                             delete: async () => false,
                             keys: async () => []
                         };
@@ -284,6 +284,20 @@
                     keys: async () => [],
                     delete: async () => false,
                     match: async () => null
+                };
+            }
+
+            // Fallback for WebAssembly.instantiateStreaming to prevent 'unreachable' traps from strict MIME type checks
+            if (typeof WebAssembly !== 'undefined' && WebAssembly.instantiateStreaming) {
+                const originalInstantiateStreaming = WebAssembly.instantiateStreaming;
+                WebAssembly.instantiateStreaming = async function (source, importObject) {
+                    try {
+                        return await originalInstantiateStreaming(source, importObject);
+                    } catch (err) {
+                        const response = await (source instanceof Promise ? source : Promise.resolve(source));
+                        const buffer = await response.arrayBuffer();
+                        return await WebAssembly.instantiate(buffer, importObject);
+                    }
                 };
             }
 
